@@ -1,0 +1,43 @@
+---
+
+# Prep the hosts for everything else
+- hosts: all
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: prep
+
+# Install and configure ETCD
+- hosts: etcd
+  become: yes
+  roles:
+    - role: etcd
+
+# Configure the K8s hosts for Kubernetes and Install Binaries
+- hosts: k8s_cluster
+  gather_facts: yes
+  become: yes
+  roles:
+    - role: kube-install
+  handlers:
+    - name: docker status
+      service: name=docker state=started
+
+# Configure the K8s Control Planes
+- hosts: control-planes
+  become: yes
+  roles:
+    - role: control-plane
+
+# Configure the K8s Workers
+- hosts: workers
+  become: yes
+  roles:
+    - role: worker
+
+# Configure the HA Load Balancer
+- hosts: load-balancer
+  become: yes
+  roles:
+    - role: load-balancer
+
